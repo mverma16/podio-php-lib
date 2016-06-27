@@ -2,25 +2,23 @@
 
 namespace App\Plugins\Reseller\Controllers;
 
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Plugins\Reseller\Controllers\ResellerController;
-use App\User;
 use App\Plugins\Reseller\Model\Reseller;
+use App\User;
 
-class ResellerOrderController extends Controller {
-
-    public function __construct() {
-        $club = new ResellerController;
-        $reseller = new Reseller;
+class ResellerOrderController extends Controller
+{
+    public function __construct()
+    {
+        $club = new ResellerController();
+        $reseller = new Reseller();
         $this->club = $club;
         $this->reseller = $reseller->where('id', '1')->first();
     }
 
-    public function ResellerOrderButton($user) {
-        
-        return "<button class='btn btn-primary' id=reseller onclick=reseller(" . $user . ")>Show All Orders</button>
+    public function ResellerOrderButton($user)
+    {
+        return "<button class='btn btn-primary' id=reseller onclick=reseller(".$user.")>Show All Orders</button>
             <script type=text/javascript>
                 function reseller(id)
                             {
@@ -38,23 +36,23 @@ class ResellerOrderController extends Controller {
                             });
                                     }
             </script>";
-        
     }
 
     /**
-     * Search for the order
-     * @param type $id
+     * Search for the order.
+     *
+     * @param type                                           $id
      * @param \App\Http\Controllers\plugin\resellerclub\User $user
      */
-    public function getSingleDomain($id, User $user) {
+    public function getSingleDomain($id, User $user)
+    {
         $user = $user->where('id', $id)->first();
         //dd($user);
 
         if ($user->customerid) {
-
-            $products = array();
+            $products = [];
             $singleus = $this->club->getsingleDomain_LinuxUS($this->reseller->userid, $this->reseller->apikey, $user->customerid);
-            
+
             if (is_array($singleus)) {
                 if (array_key_exists('1', $singleus)) {
                     $products = array_merge($products, ['single_linux_us' => $singleus[1]]);
@@ -215,72 +213,68 @@ class ResellerOrderController extends Controller {
                 if (array_key_exists('1', $ssl)) {
                     $products = array_merge($products, ['ssl' => $ssl[1]]);
                 }
-            }
-            else 
-            {
-                echo "<div class =box>";
-                echo "<div class =box-header>";
+            } else {
+                echo '<div class =box>';
+                echo '<div class =box-header>';
                 echo "<h1 class = box-title style='color:red'>Sorry! Not able to connect to Resellerclub ! Please check your Connection .</h1>";
-                echo "</div>";
-                echo "<div class =box-body>";
-                echo "</div>";
-                echo "</div>";     
+                echo '</div>';
+                echo '<div class =box-body>';
+                echo '</div>';
+                echo '</div>';
             }
-            
-            
-            echo "<div class =box>";
-            echo "<div class =box-header>";
-            echo "<h3 class = box-title>Reseller Product List</h3>";
-            echo "</div>";
-            echo "<div class =box-body>";
+
+
+            echo '<div class =box>';
+            echo '<div class =box-header>';
+            echo '<h3 class = box-title>Reseller Product List</h3>';
+            echo '</div>';
+            echo '<div class =box-body>';
             echo "<table class='table table-bordered table-striped' id='example1'>";
-            echo "<thead>";
-            echo "<tr>";
-            echo "<th>Domain Name</th>";
-            echo "<th>Product Name</th>";
-            echo "<th>Expiry</th>";
-            echo "<th>Status</th>";
-            echo "<th>Customer ID</th>";
-            echo "</tr>";
-            echo "</thead>";
-            echo "<tbody>";
+            echo '<thead>';
+            echo '<tr>';
+            echo '<th>Domain Name</th>';
+            echo '<th>Product Name</th>';
+            echo '<th>Expiry</th>';
+            echo '<th>Status</th>';
+            echo '<th>Customer ID</th>';
+            echo '</tr>';
+            echo '</thead>';
+            echo '<tbody>';
 
 
-            if(count($products)>0){
-            foreach ($products as $product) {
+            if (count($products) > 0) {
+                foreach ($products as $product) {
+                    echo '<tr>';
+                    echo '<td>'.$product['entity.description'].'</td>';
+                    echo '<td>'.$product['entitytype.entitytypename'].'</td>';
+                    if (array_key_exists('orders.endtime', $product)) {
+                        echo '<td>'.date('Y-m-d', $product['orders.endtime']).'</td>';
+                    } else {
+                        echo '<td>---</td>';
+                    }
 
-                echo "<tr>";
-                echo "<td>" . $product['entity.description'] . "</td>";
-                echo "<td>" . $product['entitytype.entitytypename'] . "</td>";
-                if (array_key_exists('orders.endtime', $product)) {
-                    echo "<td>" . date('Y-m-d', $product['orders.endtime']) . "</td>";
-                } else {
-                    echo "<td>---</td>";
-                }
 
-
-                echo "<td>" . $product['entity.currentstatus'] . "</td>";
-                echo "<td>" . $product['entity.customerid'] . "</td>";
+                    echo '<td>'.$product['entity.currentstatus'].'</td>';
+                    echo '<td>'.$product['entity.customerid'].'</td>';
                 //echo "<td>".$values."<td>";
-                echo "</tr>";
-            }
-            }else{
+                echo '</tr>';
+                }
+            } else {
                 echo "<tr><td>$user->first_name $user->last_name has no orders</td></tr>";
             }
 
-            echo "</tbody>";
-            echo "</table>";
-            echo "</div>";
-            echo "</div>";
+            echo '</tbody>';
+            echo '</table>';
+            echo '</div>';
+            echo '</div>';
         } else {
-            echo "<div class =box>";
-            echo "<div class =box-header>";
+            echo '<div class =box>';
+            echo '<div class =box-header>';
             echo "<h1 class = box-title style='color:red'>Reseller Customer id is not available</h1>";
-            echo "</div>";
-            echo "<div class =box-body>";
-            echo "</div>";
-            echo "</div>";
+            echo '</div>';
+            echo '<div class =box-body>';
+            echo '</div>';
+            echo '</div>';
         }
     }
-
 }

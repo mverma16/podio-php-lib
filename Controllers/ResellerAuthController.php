@@ -2,40 +2,39 @@
 
 namespace App\Plugins\Reseller\Controllers;
 
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\User;
+use App\Model\plugin\reseller\Country;
 use App\Plugins\Reseller\Model\Reseller;
-use App\Plugins\Reseller\Controllers\ResellerController;
+use App\User;
 use Auth;
 //use Form;
-use Hash;
-use App\Model\plugin\reseller\Country;
-use Illuminate\Database\Schema\Blueprint;
-use Schema;
 use Exception;
+use Hash;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
+use Schema;
 
-class ResellerAuthController extends Controller {
-
-    public function PostLogin() {
+class ResellerAuthController extends Controller
+{
+    public function PostLogin()
+    {
         try {
             $this->CreateUserTable();
             $email = \Input::get('email');
             $password = \Input::get('password');
-            $reseller = new ResellerController;
+            $reseller = new ResellerController();
             $club = new Reseller();
             $club = $club->where('id', '1')->first();
             $userid = $club->userid; //'619613';
             $apikey = $club->apikey; //'xr05pRZKUZJAiJUvdtrZgRr2TiXkDKFi';
             $ip = '122.171.164.172'; //$request->getClientIp();
-            $user = new User;
+            $user = new User();
             //check user in faveo
             $user = $user->where('email', $email)->first();
             //dd($user);
             //no user in faveo
             if (!$user) {
-//                dd('not a user');
+                //                dd('not a user');
                 //check user in resller club
                 $check_in_reseller = $reseller->GenerateToken($ip, $userid, $apikey, $email, $password);
                 //dd($check_in_reseller);
@@ -56,20 +55,19 @@ class ResellerAuthController extends Controller {
 //                    }
 //                    $customer = $reseller->GetCustomerbyUserName($email, $userid, $apikey);
 //                    dd($customer);
-//                    
+//
 //                    $user = new User();
 //                    $this->updateUser($customer, $user, $password);
                 }
             }
             //yes such user in faveo
             else {
-
                 if ($user->role == 'user') {
 
                     //check in reseller
                     $token = $reseller->GenerateToken($ip, $userid, $apikey, $email, $password);
 
-                    // yes user in reseller 
+                    // yes user in reseller
 
                     if ($token['status'] != 'ERROR') {
                         //get the fields
@@ -79,9 +77,7 @@ class ResellerAuthController extends Controller {
                     }
                     //no user in reseller club
                     else {
-
-                        if ((preg_match('/\d/', $password) != TRUE) || (strlen($password) < 8)) {
-
+                        if ((preg_match('/\d/', $password) != true) || (strlen($password) < 8)) {
                             $password = self::getToken(8);
                         }
                         $email = $user->email;
@@ -91,7 +87,7 @@ class ResellerAuthController extends Controller {
                         $signup = $reseller->Signup($email, $userid, $apikey, $password, $name);
                         //$signup = $reseller->Signup($email, $userid, $apikey, $password1);
                         $customer = $reseller->GetCustomerbyUserName($email, $userid, $apikey);
-                        if (is_array($customer)&& key_exists('status', $customer)) {
+                        if (is_array($customer) && array_key_exists('status', $customer)) {
                             if ($customer['status'] == 'ERROR') {
                                 throw new Exception($customer['message']);
                             }
@@ -106,33 +102,33 @@ class ResellerAuthController extends Controller {
         }
     }
 
-    public function FormRegister($flag) {
-
+    public function FormRegister($flag)
+    {
         $this->CreateUserTable();
 
 
-        $path = app_path() . '/Plugins/Reseller/views';
+        $path = app_path().'/Plugins/Reseller/views';
         \View::addNamespace('plugins', $path);
         echo \View::make('plugins::registerform')->render();
         exit();
     }
 
-    public function PostRegister(Request $request) {
-
+    public function PostRegister(Request $request)
+    {
         $this->validate($request, [
-                    'email' => 'required|max:50|email|unique:users',
-                    'full_name' => 'required',
-                    'password' => 'required|min:8|alpha_num|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                    'email'                 => 'required|max:50|email|unique:users',
+                    'full_name'             => 'required',
+                    'password'              => 'required|min:8|alpha_num|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
                     'password_confirmation' => 'required|same:password',
-                    'company' => 'required',
-                    'address-line-1' => 'required',
-                    'city' => 'required',
-                    'state' => 'required',
+                    'company'               => 'required',
+                    'address-line-1'        => 'required',
+                    'city'                  => 'required',
+                    'state'                 => 'required',
                     //'country' => 'required',
                     'zipcode' => 'required',
                     //'phone-cc' => 'required',
-                    'phone' => 'required',
-                    'lang-pref' => 'required'
+                    'phone'     => 'required',
+                    'lang-pref' => 'required',
         ]);
 
 
@@ -156,10 +152,10 @@ class ResellerAuthController extends Controller {
         if ($club->userid && $club->apikey) {
             $userid = $club->userid; //'619613';
             $apikey = $club->apikey; //'xr05pRZKUZJAiJUvdtrZgRr2TiXkDKFi';
-            $reseller = new ResellerController;
+            $reseller = new ResellerController();
             $signup = $reseller->Signup($email, $userid, $apikey, $password, $name, $company, $address, $city, $state);
             //dd($signup);
-            if (is_array($signup)&&key_exists('status', $signup)) {
+            if (is_array($signup) && array_key_exists('status', $signup)) {
                 if ($signup['status'] == 'ERROR') {
                     if ($signup['message'] != "$email is already a Customer.") {
                         throw new Exception($signup['message']);
@@ -167,22 +163,24 @@ class ResellerAuthController extends Controller {
                 }
             }
             $customer = $reseller->GetCustomerbyUserName($email, $userid, $apikey);
-            if (is_array($customer)&&key_exists('status', $customer)) {
+            if (is_array($customer) && array_key_exists('status', $customer)) {
                 if ($customer['status'] == 'ERROR') {
                     throw new Exception($customer['message']);
                 }
             }
 
             $this->updateUser($customer, $user, $password);
+
             return redirect('auth/login');
         } else {
             throw new Exception('Invalid Reseller settings');
         }
     }
 
-    public function CreateUserTable() {
+    public function CreateUserTable()
+    {
         if (!Schema::hasColumn('users', 'resellerid')) {
-            Schema::table('users', function(Blueprint $table) {
+            Schema::table('users', function (Blueprint $table) {
                 $table->string('address1');
                 $table->string('city');
                 $table->string('state');
@@ -202,7 +200,8 @@ class ResellerAuthController extends Controller {
         }
     }
 
-    public function createUserInFaveo($email, $password) {
+    public function createUserInFaveo($email, $password)
+    {
         try {
             $reseller = new ResellerController();
             $club = new Reseller();
@@ -217,7 +216,8 @@ class ResellerAuthController extends Controller {
         }
     }
 
-    public function updateUser($customer, $user, $password) {
+    public function updateUser($customer, $user, $password)
+    {
         try {
             $user->creationdt = $customer['creationdt'];
             $user->email = $customer['username'];
@@ -254,10 +254,12 @@ class ResellerAuthController extends Controller {
         }
     }
 
-    public static function crypto_rand_secure($min, $max) {
+    public static function crypto_rand_secure($min, $max)
+    {
         $range = $max - $min;
-        if ($range < 1)
-            return $min; // not so random...
+        if ($range < 1) {
+            return $min;
+        } // not so random...
         $log = ceil(log($range, 2));
         $bytes = (int) ($log / 8) + 1; // length in bytes
         $bits = (int) $log + 1; // length in bits
@@ -266,19 +268,21 @@ class ResellerAuthController extends Controller {
             $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes)));
             $rnd = $rnd & $filter; // discard irrelevant bits
         } while ($rnd >= $range);
+
         return $min + $rnd;
     }
 
-    public static function getToken($length) {
-        $token = "";
-        $codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        $codeAlphabet.= "abcdefghijklmnopqrstuvwxyz";
-        $codeAlphabet.= "0123456789";
+    public static function getToken($length)
+    {
+        $token = '';
+        $codeAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $codeAlphabet .= 'abcdefghijklmnopqrstuvwxyz';
+        $codeAlphabet .= '0123456789';
         $max = strlen($codeAlphabet) - 1;
         for ($i = 0; $i < $length; $i++) {
             $token .= $codeAlphabet[self::crypto_rand_secure(0, $max)];
         }
+
         return $token;
     }
-
 }
