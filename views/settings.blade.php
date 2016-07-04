@@ -57,27 +57,31 @@ class="active"
                 <div class="col-md-6">
                     <div class="form-group has-feedback">
                     {!!Form::label('client_id',Lang::get('Podio::lang.client-id'))!!}
-                    {!! Form::text('client_id','',['class' => 'form-control']) !!}
+                    &nbsp;<span style="color:red">*</span>
+                    {!! Form::text('client_id','',['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group has-feedback">
                     {!!Form::label('client_key',Lang::get('Podio::lang.client-secret-key'))!!}
-                    {!! Form::text('client_key','',['class' => 'form-control']) !!}
+                    &nbsp;<span style="color:red">*</span>
+                    {!! Form::text('client_key','',['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group has-feedback">
-                    {!!Form::label('username',Lang::get('lang.user_name'))!!}
-                    {!! Form::text('username','',['class' => 'form-control']) !!}
+                    {!!Form::label('username',Lang::get('Podio::lang.user_name'))!!}
+                    &nbsp;<span style="color:red">*</span>
+                    {!! Form::text('username','',['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group has-feedback">
-                    {!!Form::label('password',Lang::get('lang.password'))!!}
-                    {!! Form::text('password','',['class' => 'form-control']) !!}
+                    {!!Form::label('password',Lang::get('Podio::lang.password'))!!}
+                    &nbsp;<span style="color:red">*</span>
+                    {!! Form::text('password','',['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
             </div>
@@ -93,18 +97,64 @@ class="active"
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" id="merge-close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close closemodal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                 <img src="{{asset('lb-faveo/media/images/podio.png')}}" height="8%" width="8%">
-                <span style="font-size:1.2em">{{Lang::get('Podio::lang.create_podio_app')}}</span>
+                <span style="font-size:1.2em">{{Lang::get('Podio::lang.podio-help-title')}}</span>
             </div><!-- /.modal-header-->
             <div class ="modal-body">
-                
+                <div class="row">
+                <div class="col-md-12">
+                    <b>{{Lang::get('Podio::lang.step1')}}:</b>&nbsp;&nbsp;&nbsp;<h4>{{Lang::get('Podio::lang.authentication')}}</h4>
+                    <ul>
+                        <li>
+                            {{Lang::get('Podio::lang.generate-key-msg1')}} <a href="https://podio.com/settings/api" target="_blank">{{Lang::get('Podio::lang.here')}} </a>{{Lang::get('Podio::lang.generate-key-msg2')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.fill-fields-msg')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.submit-msg')}}
+                        </li>
+                    </ul>
+                    <b>{{Lang::get('Podio::lang.step2')}}:</b>&nbsp;&nbsp;&nbsp;<h4>{{Lang::get('Podio::lang.workspace-selection')}}</h4>
+                    <ul>
+                        <li>
+                            {{Lang::get('Podio::lang.success-auth-msg')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.select-org-drop-msg')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.select-space-drop-msg')}}
+                        </li>
+                        <li>
+                        {{Lang::get('Podio::lang.enter-app-item-name')}}
+                        </li>
+                        <li>
+                        {{Lang::get('Podio::lang.workspace-last-space')}}
+                        </li>
+                    </ul>
+                    <b>{{Lang::get('Podio::lang.step3')}}:</b>&nbsp;&nbsp;&nbsp;<h4>{{Lang::get('Podio::lang.app-authentication')}}</h4>
+                    <ul>
+                        <li>
+                            {{Lang::get('Podio::lang.app-auth-info')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.app-auth-step1')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.app-auth-step2')}}
+                        </li>
+                        <li>
+                            {{Lang::get('Podio::lang.app-auth-step3')}}
+                        </li>
+                    </ul>
+                </div>
+                </div>
             </div><!-- /.modal-body -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-default pull-left" data-dismiss="modal" id="dismis2">{!! Lang::get('lang.close') !!}</button>
-                <input  type="submit" id="merge-btn" class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}"></input>
-                {!! Form::close() !!}
-            </div><!-- /.modal-footer -->
+                    <button type="button" class="btn btn-default closemodal">{{Lang::get('lang.close')}}</button>
+            </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
@@ -197,17 +247,29 @@ class="active"
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>{!! Lang::get('Podio::lang.podio-app-name') !!}</label>
+                                {!! Form::text('app_name','',['class' => 'form-control', 'required' => true, 'placeholder' => Lang::get('Podio::lang.faveo-helpdesk'), 'id' => 'app-name']) !!}
+                            </div>
+                            <div class="col-md-6">
+                                <label>{!! Lang::get('Podio::lang.podio-item-name') !!}</label>
+                                {!! Form::text('item_name','',['class' => 'form-control', 'required' => true, 'placeholder' => Lang::get('Podio::lang.ticket'), 'id' => 'item-name']) !!}
+                            </div>
+                        </div>
                     </div><!-- mereg-body-form -->
                 </div><!-- merge-body -->
             </div><!-- /.modal-body -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal" id="dismis2">{!! Lang::get('lang.close') !!}</button>
-                <input  type="submit" id="merge-btn" class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}"></input>
+                <div id="create" style="display:none"><input  type="submit" id="merge-btn" class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}"></input></div>
+                <div id="app-auth" style="display:none"><a class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}">{{Lang::get('Podio::lang.next')}}</a></div>
                 {!! Form::close() !!}
             </div><!-- /.modal-footer -->
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
+
 @stop
 
 @section('FooterInclude')
@@ -259,7 +321,7 @@ class="active"
                         $('#loader').css('display','none');
                         $('#auth-fails').css('display','block');
                         $('#auth-success').css('display','none');
-                        $('#alert-danger').html("{{Lang::get('Podio::lang.podio-says')}}: <b>"+response+"</b> {{Lang::get('lang.occured')}}");
+                        $('#alert-danger').html("{{Lang::get('Podio::lang.podio-says')}}: <b>"+response+"</b> {{Lang::get('Podio::lang.occured')}}");
                     }
                 }
             });
@@ -274,30 +336,53 @@ class="active"
                 url: "{{route('podio-settings2')}}",
                 dataType: "html",
                 beforeSend: function() {
+                    $('#create').css('display', 'none');
                     $('#app_auth_loader').css('display', 'block');
                     $('#app_auth_body').css('display', 'none');
                 },
                 success: function(response) {
-                    $('#select-app-org').html(response);
-                    $('#app_auth_loader').css('display', 'none');
-                    $('#app_auth_body').css('display', 'block');
-                    var x = document.getElementById("select-app-org").value;
-            $.ajax({
-                type: "GET",
-                url: "{{route('podio-settings3')}}",
-                dataType: "html",
-                data: {input: x},
-                beforeSend: function() {
-                    $('#space-body').css('display', 'none');
-                    $('#space-loader').css('display', 'block');
-                    $('select-app-space').html('<img src="{{asset("lb-faveo/media/images/gifloader.gif")}}">')
-                },
-                success: function(response) {
-                    $('#select-app-space').html(response);
-                    $('#space-loader').css('display', 'none');
-                    $('#space-body').css('display', 'block');
-                }
-            });
+                    if(response == 0) {
+                        $('#create').css('display', 'none');
+                        $('#app_auth_loader').css('display', 'none');
+                        $('#app_auth_body').css('display', 'block');
+                        $('#app-body-form').css('display', 'none');
+                        $('#message-app-err').html("{{Lang::get('Podio::lang.no-organization1')}} <a href='https://podio.com/organization/new' target='_blank'>{{Lang::get('Podio::lang.click-here')}}</a> {{Lang::get('Podio::lang.no-organization2')}}");
+                        $('#app-err-alert').css('display', 'block');
+                    } else {
+                        $('#select-app-org').html(response);
+                        $('#app_auth_loader').css('display', 'none');
+                        $('#app_auth_body').css('display', 'block');
+                        $('#app-succ-alert').css('display', 'none');
+                        $('#app-err-alert').css('display', 'none');
+                        $('#app-body-form').css('display', 'block');
+                        var x = document.getElementById("select-app-org").value;
+                        $.ajax({
+                            type: "GET",
+                            url: "{{route('podio-settings3')}}",
+                            dataType: "html",
+                            data: {input: x},
+                            beforeSend: function() {
+                                $('#space-body').css('display', 'none');
+                                $('#space-loader').css('display', 'block');
+                                $('select-app-space').html('<img src="{{asset("lb-faveo/media/images/    gifloader.gif")}}">')
+                            },
+                            success: function(response) {
+                                if (response.includes("<option")) {
+                                    $('#create').css('display', 'block');
+                                    $('#select-app-space').html(response);
+                                    $('#space-loader').css('display', 'none');
+                                    $('#space-body').css('display', 'block');
+                                } else {
+                                    $('#create').css('display', 'none');
+                                    $('#app_auth_loader').css('display', 'none');
+                                    $('#app_auth_body').css('display', 'block');
+                                    $('#app-body-form').css('display', 'none');
+                                    $('#message-app-err').html("{{Lang::get('Podio::lang.no-organization1')}} <a href='https://podio.com/organization/new' target='_blank'>{{Lang::get('Podio::lang.click-here')}}</a> {{Lang::get('Podio::lang.no-organization2')}}");
+                                    $('#app-err-alert').css('display', 'block');
+                                }
+                            }
+                        });
+                    }
                 }
             });
         });
@@ -314,6 +399,7 @@ class="active"
                     $('select-app-space').html('<img src="{{asset("lb-faveo/media/images/gifloader.gif")}}">')
                 },
                 success: function(response) {
+                    $('#create').css('display', 'block');
                     $('#select-app-space').html(response);
                     $('#space-loader').css('display', 'none');
                     $('#space-body').css('display', 'block');
@@ -323,18 +409,35 @@ class="active"
         $('#app-form').on('submit', function(e){
             var x = document.getElementById("select-app-org").value;
             var y = document.getElementById("select-app-space").value;
+            var w = document.getElementById("app-name").value;
+            var z = document.getElementById("item-name").value;
             e.preventDefault();
             $.ajax({
                 type: "POST",
                 url: "{{route('podio-settings4')}}",
                 dataType: "html",
-                data: {input1: x, input2: y},
+                data: {input1: x, input2: y, input3: w, input4: z},
                 beforeSend: function() {
                     $('#app_auth_body').css('display', 'none');
                     $('#app_auth_loader').css('display', 'block');
                 },
                 success: function(response){
-                    alert(response);
+                    if(response == '1'){
+                        $('#create').css('display', 'none');
+                        $('#app-auth').css('display', 'block');
+                        $('#app_auth_loader').css('display', 'none');
+                        $('#app_auth_body').css('display', 'block'); 
+                        $('#app-body-form').css('display', 'none');
+                        $('#message-app-succ').html('App has been created.');
+                        $('#app-succ-alert').css('display', 'block');
+                    } else {
+                        $('#create').css('display', 'none');
+                        $('#app_auth_loader').css('display', 'none');
+                        $('#app_auth_body').css('display', 'block');
+                        $('#app-body-form').css('display', 'none');
+                        $('#message-app-err').html("{{Lang::get('Podio::lang.no-organization1')}} <a href='https://podio.com/organization/new' target='_blank'>{{Lang::get('Podio::lang.click-here')}}</a> {{Lang::get('Podio::lang.no-organization2')}}");
+                        $('#app-err-alert').css('display', 'block');
+                    }
                 }
             });
         });
