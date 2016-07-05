@@ -28,6 +28,12 @@ class SettingsController extends Controller
             ->where('id', '=', 1)->first();
             // dd($podio_user);
         }
+        if (!Schema::hasTable('podio_client_item')) {
+            $this->createPodioClientTable();
+        }
+        if (!Schema::hasTable('podio_app_item')) {
+            $this->createPodioTicketTable();
+        }
     }
 
     /**
@@ -180,6 +186,13 @@ class SettingsController extends Controller
         }
     }
 
+    /**
+     *@category function to create a new apps in Podio workspace
+     *
+     *@param null
+     *
+     *@return String|int $auth|1
+     */
     public function createApp()
     {
         $auth = $this->setup();
@@ -404,20 +417,6 @@ class SettingsController extends Controller
     }
 
     /**
-     *@category function to seed Podio table if exists
-     *
-     *@param null
-     *
-     *@author manish.verma@ladybirdweb.com
-     *
-     *@return null
-     */
-    // public function seedPodio()
-    // {
-    //     //do something
-    // }
-
-    /**
      *@category function to setup client_id and client secret for podio api
      *
      *@param null
@@ -440,6 +439,13 @@ class SettingsController extends Controller
         return $result;
     }
 
+    /**
+     *@category function to submit and authenticate last step's form
+     *
+     *@param null
+     *
+     *@return string|1 (error exception text on fail or 1 on success)
+     */
     public function authApp()
     {
         $app_id = Input::get('input1');
@@ -460,4 +466,42 @@ class SettingsController extends Controller
         }
         return 1;
     }
+
+    /**
+     *@category function to create podio_client_item table in db
+     *@param null
+     *@return null
+     */
+    public function createPodioClientTable()
+    {
+       if (!Schema::hasTable('podio_client_item')) {
+            Schema::create('podio_client_item', function ($table) {
+                $table->increments('id');
+                $table->string('user_id');
+                $table->string('podio_item_id');
+                $table->timestamps();
+            });
+            // $this->seedPodio();
+        } 
+    }
+
+    /**
+     *@category function to create podio_ticket_item table in db
+     *@param null
+     *@return null
+     */
+    public function createPodioTicketTable()
+    {
+       if (!Schema::hasTable('podio_ticket_item')) {
+            Schema::create('podio_ticket_item', function ($table) {
+                $table->increments('id');
+                $table->string('ticket_id');
+                $table->string('podio_item_id');
+                $table->timestamps();
+            });
+            // $this->seedPodio();
+        } 
+    }
+
 }
+
