@@ -187,7 +187,6 @@ class SettingsController extends Controller
             $space_id = (int) Input::get('input2');
             $app_name = Input::get('input3');
             $item_name = Input::get('input4');
-            // dd((int)$space_id);
             $ar = [
                 'config' => [
                     'type'                  => 'standard',
@@ -439,5 +438,26 @@ class SettingsController extends Controller
         $result = \Podio::authenticate_with_password($values[2], $values[3]);
 
         return $result;
+    }
+
+    public function authApp()
+    {
+        $app_id = Input::get('input1');
+        $app_token = Input::get('input2');
+        $podio = Podio::select('client_secret', 'client_id')
+        ->where('id', '=', 1)->first();
+        $client_id = $podio->client_id;
+        $client_secret = $podio->client_secret;
+        \Podio::setup($client_id, $client_secret);
+        $result = \Podio::authenticate_with_app($app_id, $app_token);
+        if ($result == true) {
+            \DB::table('podio')->where('id', '=', 1)
+            ->update(['faveo_app_token' => $app_token]);
+
+            return 1;
+        } else {
+            return $result;
+        }
+        return 1;
     }
 }
