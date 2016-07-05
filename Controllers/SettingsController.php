@@ -191,7 +191,7 @@ class SettingsController extends Controller
      *
      *@param null
      *
-     *@return String|int $auth|1
+     *@return string|int $auth|1
      */
     public function createApp()
     {
@@ -464,17 +464,20 @@ class SettingsController extends Controller
         } else {
             return $result;
         }
+
         return 1;
     }
 
     /**
      *@category function to create podio_client_item table in db
+     *
      *@param null
+     *
      *@return null
      */
     public function createPodioClientTable()
     {
-       if (!Schema::hasTable('podio_client_item')) {
+        if (!Schema::hasTable('podio_client_item')) {
             Schema::create('podio_client_item', function ($table) {
                 $table->increments('id');
                 $table->string('user_id');
@@ -482,17 +485,19 @@ class SettingsController extends Controller
                 $table->timestamps();
             });
             // $this->seedPodio();
-        } 
+        }
     }
 
     /**
      *@category function to create podio_ticket_item table in db
+     *
      *@param null
+     *
      *@return null
      */
     public function createPodioTicketTable()
     {
-       if (!Schema::hasTable('podio_ticket_item')) {
+        if (!Schema::hasTable('podio_ticket_item')) {
             Schema::create('podio_ticket_item', function ($table) {
                 $table->increments('id');
                 $table->string('ticket_id');
@@ -500,8 +505,6 @@ class SettingsController extends Controller
                 $table->timestamps();
             });
             // $this->seedPodio();
-        } 
+        }
     }
-
 }
-
