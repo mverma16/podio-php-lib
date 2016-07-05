@@ -4,13 +4,11 @@ namespace App\Plugins\Podio\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Podio extends Model
+class PodioClient extends Model
 {
-    protected $table = 'podio';
+    protected $table = 'podio_client_item';
 
-    protected $fillable = ['client_id', 'client_secrete',
-                           'app_id', 'app_token',
-                           'username', 'password', ];
+    protected $fillable = ['user_id', 'podio_item_id'];
 
     // public function setFacebookCallbackUrlAttribute($value)
     // {
