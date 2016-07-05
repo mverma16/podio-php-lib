@@ -53,6 +53,23 @@ class="active"
             {!!Session::get('fails')!!}
         </div>
         @endif
+        <div id="custom-alert-body2">
+                        <div class="row">
+                            <!-- <div id="loader2" style="display:none">
+                                <center><img src="{{asset('lb-faveo/media/images/gifloader.gif')}}"></center>
+                            </div> -->
+                            <div id="app-auth-success2" class="col-md-12" style="display:none">
+                                <div class="alert alert-success" id="alert-success2">
+                                <i class="fa  fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div id="app-auth-fails2" class="col-md-12" style="display:none">
+                                <div class="alert alert-danger" id="alert-danger2">
+                                <i class="fa  fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group has-feedback">
@@ -263,28 +280,87 @@ class="active"
             <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal" id="dismis2">{!! Lang::get('lang.close') !!}</button>
                 <div id="create" style="display:none"><input  type="submit" id="merge-btn" class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}"></input></div>
-                <div id="app-auth" style="display:none"><a class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}">{{Lang::get('Podio::lang.next')}}</a></div>
+                <a href="#" data-toggle="modal" id="app-auth" data-target="#myModal4" style="display:none"><button type="button" class="btn btn-primary">{{Lang::get('Podio::lang.next')}}</button></a>
                 {!! Form::close() !!}
             </div><!-- /.modal-footer -->
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
 
+<!-- Modal for last step of setting -->
+<div class="modal fade in" id="last-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false" style="display: none; padding-right: 15px;background-color: rgba(0, 0, 0, 0.7);">
+    <div class="modal-dialog" role="document">
+        <div class="col-md-2"></div>
+        <div class="col-md-12" style="height:40%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img src="{{asset('lb-faveo/media/images/podio.png')}}" height="8%" width="8%">
+                    <span style="font-size:1.2em">{{Lang::get('Podio::lang.app-authentication')}}</span> 
+                    <button type="button" class="close closemodal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <div id="custom-alert-body2">
+                        <div class="row">
+                            <div id="loader2" style="display:none">
+                                <center><img src="{{asset('lb-faveo/media/images/gifloader.gif')}}"></center>
+                            </div><!-- 
+                            <div id="app-auth-success2" class="col-md-12" style="display:none">
+                                <div class="alert alert-success" id="alert-success2">
+                                <i class="fa  fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div id="app-auth-fails2" class="col-md-12" style="display:none">
+                                <div class="alert alert-danger" id="alert-danger2">
+                                <i class="fa  fa-check-circle"></i>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div id="app-auth-form">
+                    {!! Form::open(['id'=>'app-auth-form','method' => 'POST'] )!!}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>{!! Lang::get('Podio::lang.app_id') !!}</label>
+                                {!! Form::text('app_id','',['class' => 'form-control', 'required' => true, 'placeholder' => Lang::get('Podio::lang.app_id'), 'id' => 'app-id']) !!}
+                            </div>
+                            <div class="col-md-6">
+                                <label>{!! Lang::get('Podio::lang.token') !!}</label>
+                                {!! Form::text('token','',['class' => 'form-control', 'required' => true, 'placeholder' => Lang::get('Podio::lang.token'), 'id' => 'app-token']) !!}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="close-last" class="btn btn-default closemodal pull-left">{{Lang::get('lang.close')}}</button>
+                    <div id="last-submit"><input  type="submit" id="merge-btn" class="btn btn-primary pull-right" value="{!! Lang::get('Podio::lang.create_app') !!}"></input></div>
+                </div>
+                {!! Form::close() !!}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal end -->
 @stop
 
 @section('FooterInclude')
 
 <script>
     $(document).ready(function() {
+        // function to show help popup on click
         $('#help').on('click', function(){
             $('#myModal').css('display', 'block')
             $('#custom-alert-body').css('overflow', 'auto')
         })
+
+        // fucntion to close all modal popup by clicking on close
         $('.closemodal').on('click', function(){
             $('#myModal').css('display', 'none');
             $('#auth-modal').css('display', 'none');
             $('#myModal3').css('display', 'none');
+            $('#last-modal').css('display', 'none');
         });
+
+        //fucntion to post setting page form for step 1 using ajax
         $('#podio-auth').on('submit', function(e){
             var x = [];
             e.preventDefault();
@@ -326,17 +402,22 @@ class="active"
                 }
             });
         });
+
+        // fucntion to show 2nd step modal pop up
         $('#next').on('click', function(){
             $('#auth-modal').css('display', 'none');
             $('#myModal3').css('display', 'block');
         });
+
+        //function to fecth organization and space on showing modal pop up3
         $('#myModal3').on('show.bs.modal', function() {
-            $.ajax({
+            $.ajax({// ajax request to fetch organization
                 type: "GET",
                 url: "{{route('podio-settings2')}}",
                 dataType: "html",
                 beforeSend: function() {
                     $('#create').css('display', 'none');
+                    $('#app-auth').css('display', 'none');
                     $('#app_auth_loader').css('display', 'block');
                     $('#app_auth_body').css('display', 'none');
                 },
@@ -356,7 +437,7 @@ class="active"
                         $('#app-err-alert').css('display', 'none');
                         $('#app-body-form').css('display', 'block');
                         var x = document.getElementById("select-app-org").value;
-                        $.ajax({
+                        $.ajax({// ajax request to fetch workspace
                             type: "GET",
                             url: "{{route('podio-settings3')}}",
                             dataType: "html",
@@ -386,6 +467,8 @@ class="active"
                 }
             });
         });
+
+        //function to fetch workspace for selected organization
         $('#select-app-org').on('change', function(){
             var x = document.getElementById("select-app-org").value;
             $.ajax({
@@ -406,6 +489,8 @@ class="active"
                 }
             });
         });
+
+        //function to submit second step and creating app is podio using ajax request
         $('#app-form').on('submit', function(e){
             var x = document.getElementById("select-app-org").value;
             var y = document.getElementById("select-app-space").value;
@@ -428,7 +513,7 @@ class="active"
                         $('#app_auth_loader').css('display', 'none');
                         $('#app_auth_body').css('display', 'block'); 
                         $('#app-body-form').css('display', 'none');
-                        $('#message-app-succ').html('App has been created.');
+                        $('#message-app-succ').html('{{Lang::get("Podio::lang.app-created")}}');
                         $('#app-succ-alert').css('display', 'block');
                     } else {
                         $('#create').css('display', 'none');
@@ -438,6 +523,39 @@ class="active"
                         $('#message-app-err').html("{{Lang::get('Podio::lang.no-organization1')}} <a href='https://podio.com/organization/new' target='_blank'>{{Lang::get('Podio::lang.click-here')}}</a> {{Lang::get('Podio::lang.no-organization2')}}");
                         $('#app-err-alert').css('display', 'block');
                     }
+                }
+            });
+        });
+
+        // fucntion to show last step modal after creating applicatioj
+        $('#app-auth').on('click', function(){
+            $('#myModal3').css('display', 'none');
+            $('#last-modal').css('display', 'block');
+        });
+
+        //function to submit last step form for app authentication
+        $('#app-auth-form').on('submit', function(e){
+            e.preventDefault();
+            var x = document.getElementById("app-id").value;
+            var y = document.getElementById("app-token").value;
+            $.ajax({
+                type: "POST",
+                url: "{{route('podio-settings5')}}",
+                dataType: "html",
+                data: {input1: x, input2: y},
+                beforeSend: function() {
+                    // $('#app_auth_body').css('display', 'none');
+                    // $('#app_auth_loader').css('display', 'block');
+                    $('#app-auth-form').css('display', 'none');
+                    $('#loader2').css('display', 'block');
+                },
+                success: function(response) {
+                    $('#loader2').css('display', 'none');
+                    $('#last-submit').css('display', 'none');
+                    $('#app-auth-success2').css('display', 'block');
+                    $('#alert-success2').css('display','block');
+                    $('#alert-success2').html('{{Lang::get("Podio::lang.successfull-setup-message")}}');
+                    $('#close-last').trigger("click");
                 }
             });
         });
