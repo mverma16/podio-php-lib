@@ -15,9 +15,7 @@ class PodioController extends Controller
      */
     public function __construct()
     {
-        require_once base_path().
-            DIRECTORY_SEPARATOR.
-            'App\Plugins\Podio\podio-php\PodioAPI.php'; // Require Podio client Library file to work with Podio API
+        require_once base_path().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'Plugins'.DIRECTORY_SEPARATOR.'Podio'.DIRECTORY_SEPARATOR.'podio-php'.DIRECTORY_SEPARATOR.'PodioAPI.php'; // Require Podio client Library file to work with Podio API
     }
 
     /**
@@ -92,6 +90,7 @@ class PodioController extends Controller
      */
     public function createNewClient($u_id)
     {
+        // dd($u_id);
         $is_exist = $this->checkClientExists($u_id);
         if ($is_exist == 0) {
             $auth = $this->authenticate();
@@ -100,17 +99,37 @@ class PodioController extends Controller
                         ->select('client_app_id')
                         ->where('id', '=', 1)->first();
                 $app_id = $data->client_app_id;
+                $user_data = \DB::table('users')
+                            ->select('user_name', 'first_name', 'last_name', 'email', 'country_code', 'phone_number', 'mobile')
+                            ->where('id', '=', $u_id)->first();
+                // dd($user_data->country_code);
+                if ($user_data->first_name == '') {
+                    $name = $user_data->user_name;
+                } else {
+                    $name = $user_data->first_name.' '.$user_data->last_name;
+                }
+                if ($user_data->country_code == 0 || $user_data->country_code == '') {
+                    $phone = 'Not available';
+                } else {
+                    if ($user_data->phone_number == '') {
+                        $phone = '+'.$user_data->country_code.' '.$user_data->mobile;
+                    } elseif ($user_data->mobile == '') {
+                        $phone = '+'.$user_data->country_code.' '.$user_data->phone_number;
+                    } else {
+                        $phone = '+'.$user_data->country_code.' '.$user_data->phone_number;
+                    }
+                }
                 $attr = [
                     'external_id' => 'item1',
                     'fields'      => [
-                        'name'  => 'Manish',
+                        'name'  => $name,
                         'email' => [
                             'type'  => 'work',
-                            'value' => 'mansa@gmail.com',
+                            'value' => $user_data->email,
                         ],
                         'phone' => [
                             'type'  => 'work',
-                            'value' => '8233077144',
+                            'value' => $phone,
                         ],
                     ],
                 ];
@@ -118,7 +137,7 @@ class PodioController extends Controller
                 $result = \PodioItem::create($app_id, $attr, $opt);
                 $result = $result->item_id;
                 \DB::table('podio_client_item')->insert(
-                    ['user_id' => 11, 'podio_item_id' => $result]
+                    ['user_id' => $u_id, 'podio_item_id' => $result]
                 );
 
                 return $result;
@@ -135,41 +154,94 @@ class PodioController extends Controller
      *
      *@return
      */
-    public function createPodioTicket()
+    public function createPodioTicket($events)
     {
-        $is_exist = $this->checkTicketExists(112);
+        $ticket_id = $events['ticket_number'];
+        $u_id = $events['user_id'];
+        $is_exist = $this->checkTicketExists($ticket_id);
         if ($is_exist == 0) {
             $auth = $this->authenticate();
             if ($auth == true) {
-                $client_reference_id = (int) $this->createNewClient(11);
+                $client_reference_id = (int) $this->createNewClient($u_id);
+                // dd($events);
                 $data = \DB::table('podio')
                         ->select('faveo_app_id')
                         ->where('id', '=', 1)->first();
                 $app_id = $data->faveo_app_id;
+                $subjetc = $events['subject'];
+                $body = $events['body'];
+                if ($events['status'] == null) {
+                    $status = 1;
+                } else {
+                    $status = $events['status'];
+                }
+                $priority = (int) $events['Priority'];
                 $attr = [
                     'external_id' => 'ticket1',
                     'fields'      => [
-                        'ticket-number' => 'AVCD123',
-                        'subjetc'       => 'Tester',
-                        'description'   => 'testing ticket for podio',
+                        'ticket-number' => $ticket_id,
+                        'subjetc'       => $subjetc,
+                        'description'   => $body,
                         'from'          => $client_reference_id,
                         'created-at'    => [
                             'start' => '2011-12-31 11:27:10',
                             'end'   => '2012-01-31 11:28:20',
                         ],
-                        'priority' => 1,
-                        'status'   => 2,
+                        'priority' => $priority,
+                        'status'   => $status,
                     ],
                 ];
                 $opt = [];
                 $result = \PodioItem::create($app_id, $attr, $opt);
                 $result = $result->item_id;
                 \DB::table('podio_ticket_item')->insert(
-                    ['ticket_id' => 112, 'podio_item_id' => $result]
+                    ['ticket_id' => $ticket_id, 'podio_item_id' => $result]
                 );
             }
         } else {
-            // modify ticket
+            $user_data = \DB::table('users')
+                            ->select('user_name', 'first_name', 'last_name')
+                            ->where('id', '=', $u_id)->first();
+            if ($user_data->first_name == '') {
+                $name = $user_data->user_name;
+            } else {
+                $name = $user_data->first_name.' '.$user_data->last_name;
+            }
+            $auth = $this->authenticate();
+            if ($auth == true) {
+                $comment = $events['body'];
+                // $comment = preg_replace("/<br\W*?\/>/", "\r\n", $comment);
+                // $comment = preg_replace('/<[^>]*>/', '', $comment);
+                $attr = [
+                    'value' => $comment."\r\nby ".$name,
+                ];
+                \PodioComment::create('item', $is_exist, $attr);
+            }
+        }
+    }
+
+    public function replyTicket($data)
+    {
+        // dd($data);
+        $id = $data['ticket_id'];
+        $ticket_number = \DB::table('tickets')
+                            ->select('ticket_number')
+                            ->where('id', '=', $id)
+                            ->first();
+        $ticket_number = $ticket_number->ticket_number;
+        $item_id = \DB::table('podio_ticket_item')
+                        ->select('podio_item_id')
+                        ->where('ticket_id', '=', $ticket_number)
+                        ->first();
+        $item_id = $item_id->podio_item_id;
+        $comment = $data['body'];
+        $name = $data['u_id'];
+        $attr = [
+            'value' => $comment."\r\nby ".$name,
+        ];
+        $auth = $this->authenticate();
+        if ($auth == true) {
+            \PodioComment::create('item', $item_id, $attr);
         }
     }
 }

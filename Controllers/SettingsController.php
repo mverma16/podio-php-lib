@@ -18,9 +18,7 @@ class SettingsController extends Controller
      */
     public function __construct()
     {
-        require_once base_path().
-            DIRECTORY_SEPARATOR.
-            'App\Plugins\Podio\podio-php\PodioAPI.php'; // Require Podio client Library file to work with Podio API
+        require_once base_path().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'Plugins'.DIRECTORY_SEPARATOR.'Podio'.DIRECTORY_SEPARATOR.'podio-php'.DIRECTORY_SEPARATOR.'PodioAPI.php'; // Require Podio client Library file to work with Podio API
         if (!Schema::hasTable('podio')) {
             $this->createPodioTable();
         } else {
