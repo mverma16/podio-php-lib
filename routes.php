@@ -10,3 +10,11 @@ Route::group(['middleware' => 'web'], function () {
     Route::post('podio/app-auth', ['as' => 'podio-settings5', 'uses' => 'App\Plugins\Podio\Controllers\SettingsController@authApp']);
     Route::get('podio/create-item', ['as' => 'create.item', 'uses' => 'App\Plugins\Podio\Controllers\PodioController@createPodioTicket']);
 });
+Event::listen('test', function ($events) {
+    $handler = new App\Plugins\Podio\Controllers\PodioController();
+    $handler->createPodioTicket($events);
+});
+Event::listen('reply', function ($events) {
+    $handler = new App\Plugins\Podio\Controllers\PodioController();
+    $handler->replyTicket($events);
+});
