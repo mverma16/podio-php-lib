@@ -75,14 +75,14 @@ class="active"
                     <div class="form-group has-feedback">
                     {!!Form::label('client_id',Lang::get('Podio::lang.client-id'))!!}
                     &nbsp;<span style="color:red">*</span>
-                    {!! Form::text('client_id','',['class' => 'form-control', 'required' => true]) !!}
+                    {!! Form::text('client_id',$podio_info->client_id,['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group has-feedback">
                     {!!Form::label('client_key',Lang::get('Podio::lang.client-secret-key'))!!}
                     &nbsp;<span style="color:red">*</span>
-                    {!! Form::text('client_key','',['class' => 'form-control', 'required' => true]) !!}
+                    {!! Form::text('client_key',$podio_info->client_secret,['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
             </div>
@@ -91,7 +91,7 @@ class="active"
                     <div class="form-group has-feedback">
                     {!!Form::label('username',Lang::get('Podio::lang.user_name'))!!}
                     &nbsp;<span style="color:red">*</span>
-                    {!! Form::text('username','',['class' => 'form-control', 'required' => true]) !!}
+                    {!! Form::text('username',$podio_info->username,['class' => 'form-control', 'required' => true]) !!}
                     </div>
                 </div>
                 <div class="col-md-6">

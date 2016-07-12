@@ -52,4 +52,15 @@ return [
    'token'                             => 'Token',
    'successfull-setup-message'         => 'Your Podio plugin has been set up successfully.',
    'app-created'                       => 'App has been created successfully',
+   'InvalidGrantError'                 => 'Please check your credentials',
+   'BadRequestError'                   => 'Invalid arguments passed.',
+   'AuthorizationError'                => 'Authentication required to access the API',
+   'ForbiddenError'                    => 'You are not authorized to access requested object',
+   'NotFoundError'                     => 'The objetc you are searching not found',
+   'ConflictError'                     => 'Some confliction occered while calling the API',
+   'GoneError'                         => 'Something went wrong',
+   'RateLimitError'                    => 'Maximum limit to hit APIs has been reached, try after some time',
+   'UnavailableError'                  => 'Podio is currently unavailable',
+   'ServerError'                       => 'Something went wrong on the server',
+
 ];

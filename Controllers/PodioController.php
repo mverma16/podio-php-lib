@@ -16,6 +16,14 @@ class PodioController extends Controller
     public function __construct()
     {
         require_once base_path().DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'Plugins'.DIRECTORY_SEPARATOR.'Podio'.DIRECTORY_SEPARATOR.'podio-php'.DIRECTORY_SEPARATOR.'PodioAPI.php'; // Require Podio client Library file to work with Podio API
+        $data = \DB::table('podio')
+            ->select('client_app_id', 'faveo_app_id', 'faveo_app_token')
+            ->where('id', '=', 1)
+            ->first();
+        if ($data->client_app_id == '' || $data->faveo_app_id || $data->faveo_app_token) {
+            return false;
+        }
+
     }
 
     /**
@@ -120,7 +128,7 @@ class PodioController extends Controller
                     }
                 }
                 $attr = [
-                    'external_id' => 'item1',
+                    'external_id' => 'clients',
                     'fields'      => [
                         'name'  => $name,
                         'email' => [
@@ -150,26 +158,30 @@ class PodioController extends Controller
     /**
      *@category function to create a new tickets or comment on available tickets in the app
      *
-     *@param
+     *@param array $events
      *
      *@return
      */
     public function createPodioTicket($events)
     {
         $ticket_id = $events['ticket_number'];
+        $ticket_number = \DB::table('tickets')
+                            ->select('id')
+                            ->where('ticket_number', '=', $ticket_id)
+                            ->first();
         $u_id = $events['user_id'];
         $is_exist = $this->checkTicketExists($ticket_id);
         if ($is_exist == 0) {
             $auth = $this->authenticate();
             if ($auth == true) {
                 $client_reference_id = (int) $this->createNewClient($u_id);
-                // dd($events);
                 $data = \DB::table('podio')
                         ->select('faveo_app_id')
                         ->where('id', '=', 1)->first();
                 $app_id = $data->faveo_app_id;
                 $subjetc = $events['subject'];
                 $body = $events['body'];
+                $created_at = date('Y-m-d H:i:s');
                 if ($events['status'] == null) {
                     $status = 1;
                 } else {
@@ -177,18 +189,18 @@ class PodioController extends Controller
                 }
                 $priority = (int) $events['Priority'];
                 $attr = [
-                    'external_id' => 'ticket1',
+                    'external_id' => 'tickets',
                     'fields'      => [
                         'ticket-number' => $ticket_id,
-                        'subjetc'       => $subjetc,
+                        'subject'       => $subjetc,
                         'description'   => $body,
                         'from'          => $client_reference_id,
                         'created-at'    => [
-                            'start' => '2011-12-31 11:27:10',
-                            'end'   => '2012-01-31 11:28:20',
+                            'start' => $created_at,
+                            //'end'   => '2012-01-31 11:28:20',
                         ],
-                        'priority' => $priority,
-                        'status'   => $status,
+                        'priority' => (int) $priority,
+                        'status'   => (int) $status,
                     ],
                 ];
                 $opt = [];
@@ -197,6 +209,11 @@ class PodioController extends Controller
                 \DB::table('podio_ticket_item')->insert(
                     ['ticket_id' => $ticket_id, 'podio_item_id' => $result]
                 );
+                $url = route('ticket.thread',$ticket_number->id);
+                $attr = [
+                    'value' => "Click on the following link to view this ticket in Faveo\r\n ".$url."\r\n*****************************",
+                ];
+                \PodioComment::create('item', $result, $attr);
             }
         } else {
             $user_data = \DB::table('users')
@@ -210,19 +227,30 @@ class PodioController extends Controller
             $auth = $this->authenticate();
             if ($auth == true) {
                 $comment = $events['body'];
-                // $comment = preg_replace("/<br\W*?\/>/", "\r\n", $comment);
-                // $comment = preg_replace('/<[^>]*>/', '', $comment);
+                // dd($comment);
+                $comment = str_replace('<br>', "\r\n", $comment);
+                $comment = str_replace('<br/>', "\r\n", $comment);
+                $comment = str_replace('</div>', "\r\n", $comment);
+                $comment = str_replace('</p>', "\r\n", $comment);
+                $comment = str_replace('".."', '', $comment);
+                $comment = preg_replace('/<[^>]*>/', '', $comment);
                 $attr = [
-                    'value' => $comment."\r\nby ".$name,
+                    'value' => "\r\n".$comment."\r\nby ".$name."\r\n*****************************",
                 ];
                 \PodioComment::create('item', $is_exist, $attr);
             }
         }
     }
 
+    /**
+     *@category function to post comment in podio on agents reply
+     *
+     *@param array $data
+     *
+     *@return null
+     */
     public function replyTicket($data)
     {
-        // dd($data);
         $id = $data['ticket_id'];
         $ticket_number = \DB::table('tickets')
                             ->select('ticket_number')
@@ -235,9 +263,15 @@ class PodioController extends Controller
                         ->first();
         $item_id = $item_id->podio_item_id;
         $comment = $data['body'];
+        $comment = str_replace('<br>', "\r\n", $comment);
+        $comment = str_replace('<br/>', "\r\n", $comment);
+        $comment = str_replace('</div>', "\r\n", $comment);
+        $comment = str_replace('</p>', "\r\n", $comment);
+        $comment = str_replace('".."', '', $comment);
+        $comment = preg_replace('/<[^>]*>/', '', $comment);
         $name = $data['u_id'];
         $attr = [
-            'value' => $comment."\r\nby ".$name,
+            'value' => "\r\n".$comment."\r\nby ".$name."\r\n*****************************",
         ];
         $auth = $this->authenticate();
         if ($auth == true) {

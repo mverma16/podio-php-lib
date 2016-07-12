@@ -45,8 +45,14 @@ class SettingsController extends Controller
     {
         $path = app_path().'/Plugins/Podio/views';
         \View::addNamespace('plugins', $path);
-
-        return view('plugins::settings');
+        $podio_info = \DB::table('podio')
+            ->select('client_id', 'client_secret', 'username')
+            ->where('id', '=', 1)->first();
+        if ($podio_info == null) {
+            return view('plugins::settings');
+        } else {
+            return view('plugins::edit', compact('podio_info'));
+        }
     }
 
     /**
@@ -193,6 +199,22 @@ class SettingsController extends Controller
      */
     public function createApp()
     {
+        $status_data = \DB::table('ticket_status')
+            ->select('id', 'name')
+            ->get();
+        $status_data2 = [];
+        foreach ($status_data as $value) {
+            array_push($status_data2, ['text' => $value->name]);
+        }
+
+        $priority_data = \DB::table('ticket_priority')
+            ->select('priority_id', 'priority')
+            ->get();
+        $priority_data2 = [];
+        foreach ($priority_data as $value) {
+            array_push($priority_data2, ['text' => $value->priority]);
+        }
+
         $auth = $this->setup();
         if ($auth == true) {
             $space_id = (int) Input::get('input2');
@@ -255,160 +277,142 @@ class SettingsController extends Controller
                 ],
             ];
             $response = \PodioApp::create($ar);
-            $client_app_id = $response->app_id;
-            $ar2 = [
-                'config' => [
-                    'type'                  => 'standard',
-                    'app_item_id_padding'   => 1,
-                    'app_item_id_prefix'    => '',
-                    'show_app_item_id'      => false,
-                    'allow_comments'        => true,
-                    'allow_create'          => true,
-                    'allow_edit'            => true,
-                    'allow_attachments'     => true,
-                    'silent_creates'        => false,
-                    'silent_edits'          => false,
-                    'disable_notifications' => false,
-                    'default_view'          => 'badge',
-                    'allow_tags'            => false,
-                    'icon'                  => '396.png',
-                    'name'                  => "$app_name",
-                    'item_name'             => "$item_name",
-                ],
-                'space_id' => $space_id,
-                'fields'   => [
-                   [
+            if ($response == null) {
+                return $response;
+            } else {
+                $client_app_id = $response->app_id;
+                $ar2 = [
                     'config' => [
-                        'label'    => 'Ticket Number',
-                        'delta'    => 1,
-                        'settings' => [
-                            'size' => 'small',
-                        ],
-                        'required' => true,
-                        ],
-                        'type' => 'text',
+                        'type'                  => 'standard',
+                        'app_item_id_padding'   => 1,
+                        'app_item_id_prefix'    => '',
+                        'show_app_item_id'      => false,
+                        'allow_comments'        => true,
+                        'allow_create'          => true,
+                        'allow_edit'            => true,
+                        'allow_attachments'     => true,
+                        'silent_creates'        => false,
+                        'silent_edits'          => false,
+                        'disable_notifications' => false,
+                        'default_view'          => 'badge',
+                        'allow_tags'            => false,
+                        'icon'                  => '396.png',
+                        'name'                  => "$app_name",
+                        'item_name'             => "$item_name",
                     ],
-                    [
-                    'config' => [
-                        'label'    => 'Subjetc',
-                        'delta'    => 2,
-                        'settings' => [
-                            'size' => 'small',
-                        ],
-                        'required' => true,
-                        ],
-                        'type' => 'text',
-                    ],
-                    [
-                    'config' => [
-                        'label'    => 'Description',
-                        'delta'    => 3,
-                        'settings' => [
-                            'size' => 'large',
-                        ],
-                        'required' => false,
-                        ],
-                        'type' => 'text',
-                    ],
-                    [
-                    'config' => [
-                        'label'    => 'From',
-                        'delta'    => 4,
-                        'settings' => [
-                            'referenced_apps' => [
-                                [
-                                    'app_id' => $client_app_id,
-                                ],
+                    'space_id' => $space_id,
+                    'fields'   => [
+                       [
+                        'config' => [
+                            'label'    => 'Ticket Number',
+                            'delta'    => 2,
+                            'settings' => [
+                                'size' => 'small',
                             ],
-                            'multiple' => false,
-                        ],
-                        'required' => false,
-                        ],
-                        'type' => 'app',
-                    ],
-                    [
-                    'config' => [
-                        'label'    => 'Created at',
-                        'delta'    => 5,
-                        'settings' => [
-                            'size' => 'large',
-                        ],
-                        'required' => false,
-                        ],
-                        'type' => 'date',
-                    ],
-                    [
-                    'config' => [
-                        'label'    => 'Assigned to',
-                        'delta'    => 8,
-                        'settings' => [
-                            'type' => 'all_users',
-                        ],
-                        'required' => false,
-                        ],
-                        'type' => 'contact',
-                    ],
-                    [
-                    'config' => [
-                        'label'    => 'Priority',
-                        'delta'    => 6,
-                        'settings' => [
-                            'options' => [
-                                [
-                                    'text' => 'Low',
-                                ],
-                                [
-                                  'text' => 'Normal',
-                                ],
-                                [
-                                  'text' => 'High',
-                                ],
-                                [
-                                  'text' => 'Emergency',
-                                ],
+                            'required' => true,
                             ],
-                            'multiple' => false,
-                            'display'  => 'inline',
+                            'type' => 'text',
                         ],
-                        'required' => false,
-                        ],
-                        'type' => 'category',
-                    ],
-                    [
-                    'config' => [
-                        'label'    => 'Status',
-                        'delta'    => 7,
-                        'settings' => [
-                            'options' => [
-                                [
-                                    'text' => 'Open',
-                                ],
-                                [
-                                  'text' => 'Closed',
-                                ],
-                                [
-                                  'text' => 'Overdue',
-                                ],
-                                [
-                                  'text' => 'X',
-                                ],
+                        [
+                        'config' => [
+                            'label'    => 'Subject',
+                            'delta'    => 1,
+                            'settings' => [
+                                'size' => 'small',
                             ],
-                            'multiple' => false,
-                            'display'  => 'inline',
+                            'required' => true,
+                            ],
+                            'type' => 'text',
                         ],
-                        'required' => false,
+                        [
+                        'config' => [
+                            'label'    => 'Description',
+                            'delta'    => 3,
+                            'settings' => [
+                                'size' => 'large',
+                            ],
+                            'required' => false,
+                            ],
+                            'type' => 'text',
                         ],
-                        'type' => 'category',
+                        [
+                        'config' => [
+                            'label'    => 'From',
+                            'delta'    => 4,
+                            'settings' => [
+                                'referenced_apps' => [
+                                    [
+                                        'app_id' => $client_app_id,
+                                    ],
+                                ],
+                                'multiple' => false,
+                            ],
+                            'required' => false,
+                            ],
+                            'type' => 'app',
+                        ],
+                        [
+                        'config' => [
+                            'label'    => 'Created at',
+                            'delta'    => 5,
+                            'settings' => [
+                                'size' => 'large',
+                            ],
+                            'required' => false,
+                            ],
+                            'type' => 'date',
+                        ],
+                        [
+                        'config' => [
+                            'label'    => 'Assigned to',
+                            'delta'    => 8,
+                            'settings' => [
+                                'type' => 'all_users',
+                            ],
+                            'required' => false,
+                            ],
+                            'type' => 'contact',
+                        ],
+                        [
+                        'config' => [
+                            'label'    => 'Priority',
+                            'delta'    => 6,
+                            'settings' => [
+                                'options'  => $priority_data2,
+                                'multiple' => false,
+                                'display'  => 'inline',
+                            ],
+                            'required' => false,
+                            ],
+                            'type' => 'category',
+                        ],
+                        [
+                        'config' => [
+                            'label'    => 'Status',
+                            'delta'    => 7,
+                            'settings' => [
+                                'options'  => $status_data2,
+                                'multiple' => false,
+                                'display'  => 'inline',
+                            ],
+                            'required' => false,
+                            ],
+                            'type' => 'category',
+                        ],
                     ],
-                ],
-            ];
-            $response = \PodioApp::create($ar2);
-            $faveo_app_id = $response->app_id;
-            \DB::table('podio')->where('id', '=', 1)
-            ->update(['client_app_id' => $client_app_id,
-                    'faveo_app_id'    => $faveo_app_id, ]);
+                ];
+                $response = \PodioApp::create($ar2);
+                if ($response == null) {
+                    return $response;
+                } else {
+                    $faveo_app_id = $response->app_id;
+                    \DB::table('podio')->where('id', '=', 1)
+                    ->update(['client_app_id' => $client_app_id,
+                        'faveo_app_id'        => $faveo_app_id, ]);
 
-            return 1;
+                    return 1;
+                }
+            }
         } else {
             return $auth;
         }
