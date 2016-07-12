@@ -23,7 +23,6 @@ class PodioController extends Controller
         if ($data->client_app_id == '' || $data->faveo_app_id || $data->faveo_app_token) {
             return false;
         }
-
     }
 
     /**
@@ -209,7 +208,7 @@ class PodioController extends Controller
                 \DB::table('podio_ticket_item')->insert(
                     ['ticket_id' => $ticket_id, 'podio_item_id' => $result]
                 );
-                $url = route('ticket.thread',$ticket_number->id);
+                $url = route('ticket.thread', $ticket_number->id);
                 $attr = [
                     'value' => "Click on the following link to view this ticket in Faveo\r\n ".$url."\r\n*****************************",
                 ];
