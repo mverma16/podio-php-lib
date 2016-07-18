@@ -2,8 +2,18 @@
 
 class Podio
 {
-    public static $oauth, $debug, $logger, $session_manager, $last_response, $auth_type;
-    protected static $url, $client_id, $client_secret, $secret, $ch, $headers;
+    public static $oauth;
+    public static $debug;
+    public static $logger;
+    public static $session_manager;
+    public static $last_response;
+    public static $auth_type;
+    protected static $url;
+    protected static $client_id;
+    protected static $client_secret;
+    protected static $secret;
+    protected static $ch;
+    protected static $headers;
     private static $stdout;
 
     const VERSION = '4.3.0';
