@@ -7,8 +7,7 @@ class PodioLogger
 {
     protected $enabled = true;
     public $call_log = [];
-    public $file;
-    public $maxsize;
+    public $file, $maxsize;
 
     public function __construct()
     {

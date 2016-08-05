@@ -461,26 +461,26 @@ class SettingsController extends Controller
         if ($result == true) {
             \DB::table('podio')->where('id', '=', 1)
             ->update(['faveo_app_token' => $app_token]);
+        //hooks for comment creation
             $attr = [
-                        'url' => route('handle'),
-                'type'        => 'comment.create',
-                    ];
-            $result = \PodioHook::create('app', $app_id, $attr);
-            $result = \PodioHook::verify($result);
-
+                "url" => route('handle'),
+	    		"type" => 'comment.create',
+            ];
+            $result = \PodioHook::create( 'app', $app_id, $attr );
+            $result = \PodioHook::verify( $result );
+            //hook for item status update
             $attr = [
-                        'url' => route('handle'),
-                'type'        => 'item.update',
-                    ];
-            $result2 = \PodioHook::create('app', $app_id, $attr);
-            $result2 = \PodioHook::verify($result);
-
+                "url" => route('handle'),
+	    		"type" => 'item.update',
+            ];
+            $result2 = \PodioHook::create( 'app', $app_id, $attr );
+            $result2 = \PodioHook::verify( $result );
             return 1;
-        } else {
-            return $result;
-        }
-
-        return 1;
+            } else {
+                return $result;
+            }
+    
+            return 1;
     }
 
     /**
@@ -522,4 +522,5 @@ class SettingsController extends Controller
             // $this->seedPodio();
         }
     }
+
 }
